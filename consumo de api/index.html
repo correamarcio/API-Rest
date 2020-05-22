@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <br>
+    <h4>Lista de games</h4>
+    <ul id="times">
+
+    </ul>
+    <hr>
+    <h4>new game</h4>
+    <input type="text" name="name" id="name" placeholder="Name"><br>
+    <input type="text" name="goals" id="goals" placeholder="Gols"><br>
+    <input type="text" name="points" id="points" placeholder="points"><br>
+    <input type="number" name="id" id="id" placeholder="id"><br>
+    <button onclick="createGame()">Cadastrar</button>
+    <hr>
+    <h4>Editar time</h4>
+    <input type="text" name="nameEdit" id="nameEdit" placeholder="Name"><br>
+    <input type="text" name="goalsEdit" id="goalsEdit" placeholder="Gols"><br>
+    <input type="text" name="pointsEdit" id="pointsEdit" placeholder="points"><br>
+    <input type="number" name="idEdit" id="idEdit" placeholder="id" readonly><br>
+    <button onclick="updateTime()">Editar</button>
+    <hr>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    function createGame() {
+        let nameInput = document.getElementById("name")
+        let goalsInput = document.getElementById("goals")
+        let pointsInput = document.getElementById("points")
+        let idInput = document.getElementById("id")
+
+        let time = {
+            id: idInput.value,
+            name: nameInput.value,
+            goals: goalsInput.value,
+            points: pointsInput.value,
+        }
+
+        axios.post("http://mc:8080/time", time).then(response => {
+            if (response.status === 409) {
+                alert("Item já cadastrado")
+                console.log("Item já existee")
+            }
+            if (response.status == 200) {
+                alert("Cadastrado")
+            }
+
+        }).catch()
+    }
+
+    function deleteTime(listItem) {
+        var id = listItem.getAttribute("data-id")
+        axios.delete("http://mc:8080/time/" + id).then(() => {
+            alert("Deletado")
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
+    var loadForm = function (listItem) {
+        var id = listItem.getAttribute("data-id")
+        var name = listItem.getAttribute("data-name")
+        var points = listItem.getAttribute("data-points")
+        var goals = listItem.getAttribute("data-goals")
+        document.getElementById("nameEdit").value = name
+        document.getElementById("goalsEdit").value = goals
+        document.getElementById("pointsEdit").value = points
+        document.getElementById("idEdit").value = id
+    }
+
+    var updateTime = function () {
+        let nameInput = document.getElementById("nameEdit")
+        let goalsInput = document.getElementById("goalsEdit")
+        let pointsInput = document.getElementById("pointsEdit")
+        let idInput = document.getElementById("idEdit")
+
+        let time = {
+            id: idInput.value,
+            name: nameInput.value,
+            goals: goalsInput.value,
+            points: pointsInput.value,
+        }
+
+        axios.put("http://mc:8080/time/" + time.id, time).then(response => {
+            if (response.status == 200) {
+                alert("Atualizado")
+            }
+
+        }).catch()
+    }
+
+    axios.get("http://mc:8080/times").then(response => {
+        let times = response.data
+        var list = document.getElementById("times")
+        times.forEach(time => {
+            var item = document.createElement("li")
+            item.setAttribute("data-id", time.id)
+            item.setAttribute("data-name", time.name)
+            item.setAttribute("data-goals", time.goals)
+            item.setAttribute("data-points", time.points)
+            item.innerHTML = `${time.name} - ${time.goals} - ${time.points} `
+            var deleteBtn = document.createElement("button")
+            var editBtn = document.createElement("button")
+            deleteBtn.innerHTML = "Deletar"
+            editBtn.innerHTML = "Editar"
+
+            deleteBtn.addEventListener("click", () => {
+                deleteTime(item)
+            })
+            editBtn.addEventListener("click", () => {
+                loadForm(item)
+            })
+
+            item.appendChild(deleteBtn)
+            item.appendChild(editBtn)
+            list.appendChild(item)
+        });
+    }).catch(err => {
+        console.log(err)
+    })
+</script>
+
+</html>
