@@ -1,2 +1,2 @@
 # easy-API
- 23/5000 Simple api with node.js
+Simple api with Axios e authentication JWT node.js
